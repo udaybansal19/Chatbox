@@ -1,0 +1,30 @@
+#output {
+    background-color: aliceblue;
+    width: 510px;
+    height: 500px;
+    margin: auto;
+    margin-top: 50px;
+}
+
+.send-message {
+    align-content: center;
+    width: 510px;
+    margin: auto;
+}
+
+#message {
+    margin: auto;
+    width: 400px;
+    height: 40px;
+    border-width: medium;
+    border-color: cadetblue;
+    border-radius: 10px;
+}
+
+#send {
+    background-color: #2196F3;
+    border-radius: 10px;
+    width: 100px;
+    height: 40px;
+    color: white;
+}
