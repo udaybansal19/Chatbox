@@ -17,5 +17,12 @@ io.on("connection", (socket) =>{
             io.sockets.emit("msg",data);
             console.log(data);
     });
+    var c=0;
+    if(c==0)
+    socket.on("peerID", (data) =>{
+        console.log("The peer ID is: " + data);
+        io.sockets.emit("peerID",data);
+        c++;
+});
 
 });
