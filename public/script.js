@@ -27,11 +27,10 @@ var f = 1;
 socket.on("peerID",(data) => {
     if(data != peer.id && data != null){
         console.log("Peer Found: " + data);
-        console.log("flag");
       var conn = peer.connect(data);
       //sender
       f=0;
-      console.log(sender);
+      console.log("sender");
       messaging(conn);
     }
 });
