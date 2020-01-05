@@ -5,6 +5,13 @@
     margin-top: 50px;
 }
 
+.video-chat {
+    margin: auto;
+    width: 510px;
+    height: 500px;
+    margin-top: 50px;
+}
+
 #output {
     background-color: aliceblue;
     height: -webkit-fill-available;
