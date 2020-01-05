@@ -1,4 +1,4 @@
-var socket = io.connect("http://192.168.1.13:8081/");
+//var socket = io.connect("http://192.168.1.13:8081/");
 
 var output = document.getElementById("output");
 var message = document.getElementById("message");
@@ -9,7 +9,11 @@ var peer = new Peer({key: 'lwjd5qra8257b9'});
 
 peer.on('open', function(id) {
     console.log('My peer ID is: ' + id);
-    socket.emit("peerID",peer.id); 
+    //socket.emit("peerID",peer.id);
+    peer.on('connection', function(conn) {
+      console.log("receiver");
+      messaging(conn);
+    });
   });
   
 
@@ -35,49 +39,60 @@ function successCallback(stream){
 function errorCallback(error) {
   console.log("navigator.getUserMedia: ",error);
 }    
-var getUserMedia = navigator.getUserMedia(constraints,successCallback,errorCallback) || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-var mediaStream = navigator.mediaDevices.getUserMedia(constraints)
-.then(function(stream) {
-  /* use the stream */
-  var video = document.getElementById("webcam");
-  video.srcObject = stream;
-  mediaStream = stream;
-})
-.catch(function(err) {
-  /* handle the error */
-  console.log("Error in getUserMedia");
+// var getUserMedia = navigator.getUserMedia(constraints,successCallback,errorCallback) || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+// var mediaStream = navigator.mediaDevices.getUserMedia(constraints)
+// .then(function(stream) {
+//   /* use the stream */
+//   var video = document.getElementById("webcam");
+//   video.srcObject = stream;
+//   mediaStream = stream;
+// })
+// .catch(function(err) {
+//   /* handle the error */
+//   console.log("Error in getUserMedia");
+// });
+
+var connect = document.getElementById("connect");
+
+connect.addEventListener("click", () => {
+  var deviceID = document.getElementById("device-id");
+  var conn = peer.connect(deviceID.value);
+  //sender
+ // f=0;
+  console.log("sender");
+  messaging(conn); 
 });
-socket.on("peerID",(data) => {
-    if(data != peer.id && data != null){
-        console.log("Peer Found: " + data);
-      var conn = peer.connect(data);
-      //sender
-      f=0;
-      console.log("sender");
-      messaging(conn);
+// socket.on("peerID",(data) => {
+//     if(data != peer.id && data != null){
+//         console.log("Peer Found: " + data);
+//       var conn = peer.connect(data);
+//       //sender
+//       f=0;
+//       console.log("sender");
+//       messaging(conn);
 
-     // getUserMedia({video: true, audio: true}, function(stream) {
-        var call = peer.call(data, mediaStream);
-        videoCalling(call);
-  //});
- }
-  if(f){
-    //receiver
-    peer.on('connection', function(conn) {
-        console.log("receiver");
-        messaging(conn);
-      });
+//      // getUserMedia({video: true, audio: true}, function(stream) {
+//         // var call = peer.call(data, mediaStream);
+//         // videoCalling(call);
+//   //});
+//  }
+//   if(f){
+//     //receiver
+//     peer.on('connection', function(conn) {
+//         console.log("receiver");
+//         messaging(conn);
+//       });
 
-      peer.on('call', function(call) {
-        // Answer the call, providing our mediaStream
-        //getUserMedia({video: true, audio: true}, function(stream) {
-          call.answer(mediaStream); // Answer the call with an A/V stream.
-        videoCalling(call);
+//       peer.on('call', function(call) {
+//         // Answer the call, providing our mediaStream
+//         //getUserMedia({video: true, audio: true}, function(stream) {
+//         //   call.answer(mediaStream); // Answer the call with an A/V stream.
+//         // videoCalling(call);
 
-        //});
-      });
-  }
-});
+//         //});
+//       });
+//   }
+// });
 
 
 function messaging(conn){
