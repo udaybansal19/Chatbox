@@ -12,6 +12,17 @@
     margin-top: 50px;
 }
 
+#webcam {
+    transform: rotateY(180deg);
+    -webkit-transform:rotateY(180deg); /* Safari and Chrome */
+    -moz-transform:rotateY(180deg); /* Firefox */
+}
+#peer-webcam {
+    transform: rotateY(180deg);
+    -webkit-transform:rotateY(180deg); /* Safari and Chrome */
+    -moz-transform:rotateY(180deg); /* Firefox */
+}
+
 #output {
     background-color: aliceblue;
     height: -webkit-fill-available;

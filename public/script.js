@@ -1,4 +1,4 @@
-var socket = io.connect("http://192.168.1.13:8081/");
+var socket = io.connect("http://192.168.1.16:8081/");
 
 var output = document.getElementById("output");
 var message = document.getElementById("message");
