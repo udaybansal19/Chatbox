@@ -1,4 +1,4 @@
-var socket = io.connect("http://192.168.137.1:8081/");
+var socket = io.connect("https://192.168.137.1:8081/",{secure : true});
 
 var output = document.getElementById("output");
 var message = document.getElementById("message");
