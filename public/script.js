@@ -1,9 +1,9 @@
-var socket = io.connect("http://192.168.1.16:8081/");
+var socket = io.connect("http://192.168.137.1:8081/");
 
 var output = document.getElementById("output");
 var message = document.getElementById("message");
 var send = document.getElementById("send");
-var constraints = { video : true };
+var constraints = { video : true , audio : true };
 
 var peer = new Peer({key: 'lwjd5qra8257b9'});
 
