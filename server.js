@@ -7,7 +7,7 @@ var socket = require('socket.io');
 
 app.use(express.static("public"));
 
-var server = https.createServer({
+var server = http.createServer({
     key: fs.readFileSync('./key.pem'),
     cert: fs.readFileSync('./cert.pem')
 }, app)
