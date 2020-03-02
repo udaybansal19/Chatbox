@@ -12,6 +12,7 @@
     "express": "^4.17.1",
     "fs": "0.0.1-security",
     "https": "^1.0.0",
+    "matrix-js-sdk": "^5.0.1",
     "socket.io": "^2.3.0",
     "webrtc": "^1.14.1"
   }
