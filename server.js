@@ -33,3 +33,17 @@ io.on("connection", (socket) =>{
 });
 
 });
+
+var firebaseConfig = {
+    apiKey: "AIzaSyCeUDv1aYk2SbhHhM_C7AZvLjrsI6H_XHU",
+    authDomain: "chatbox-3bafb.firebaseapp.com",
+    databaseURL: "https://chatbox-3bafb.firebaseio.com",
+    projectId: "chatbox-3bafb",
+    storageBucket: "chatbox-3bafb.appspot.com",
+    messagingSenderId: "426689793721",
+    appId: "1:426689793721:web:ed37cb7f2d52c92c741568",
+    measurementId: "G-WLJM0X1KM9"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
