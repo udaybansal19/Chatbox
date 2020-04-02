@@ -5,7 +5,7 @@ const https = require('https');
 const fs = require('fs');
 var socket = require('socket.io');
 
-app.use(express.static("public"));
+app.use(express.static("Interactive3DCharacter"));
 
 var server = http.createServer({
     key: fs.readFileSync('./key.pem'),
