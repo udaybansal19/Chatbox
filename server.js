@@ -5,7 +5,9 @@ const https = require('https');
 const fs = require('fs');
 var socket = require('socket.io');
 
-app.use(express.static("Interactive3DCharacter"));
+app.use('/chat',express.static("Chat"));
+app.use('/video',express.static("Video_Call"));
+
 
 var server = http.createServer({
     key: fs.readFileSync('./key.pem'),
