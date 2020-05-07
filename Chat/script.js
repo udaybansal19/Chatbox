@@ -14,3 +14,5 @@ socket.on("msg", (data) => {
     output.innerHTML += "<p>" + data + "</p>";
 });
 
+
+
