@@ -5,6 +5,7 @@ const https = require('https');
 const fs = require('fs');
 var socket = require('socket.io');
 
+app.use('/',express.static("Chat"));
 app.use('/chat',express.static("Chat"));
 app.use('/video',express.static("Video_Call"));
 
@@ -17,6 +18,8 @@ var server = http.createServer({
     console.log("Server is running on 8081");
 });
 
+
+//----------Signalling--------------//
 var io = socket(server);
 
 io.on("connection", (socket) =>{
@@ -26,12 +29,4 @@ io.on("connection", (socket) =>{
             io.sockets.emit("msg",data);
             console.log(data);
     });
-    var c=0;
-    if(c==0)
-    socket.on("peerID", (data) =>{
-        console.log("The peer ID is: " + data);
-        io.sockets.emit("peerID",data);
-        c++;
-});
-
 });

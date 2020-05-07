@@ -12,16 +12,13 @@
     margin-top: 50px;
 }
 
-#webcam {
-    transform: rotateY(180deg);
-    -webkit-transform:rotateY(180deg); /* Safari and Chrome */
-    -moz-transform:rotateY(180deg); /* Firefox */
-}
-#peer-webcam {
-    transform: rotateY(180deg);
-    -webkit-transform:rotateY(180deg); /* Safari and Chrome */
-    -moz-transform:rotateY(180deg); /* Firefox */
-}
+.icon {
+    position: absolute;
+    left: 990px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
 
 #output {
     background-color: aliceblue;
