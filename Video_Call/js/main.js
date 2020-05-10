@@ -1,14 +1,9 @@
 var localVideo = document.getElementById("localVideo");
 var remoteVideo = document.getElementById("remoteVideo");
 
-// Define action buttons.
 const startButton = document.getElementById('startButton');
 const callButton = document.getElementById('callButton');
 const hangupButton = document.getElementById('hangupButton');
-
-// Set up initial action buttons status: disable call and hangup.
-//callButton.disabled = true;
-//hangupButton.disabled = true;
 
 // Add click event handlers for buttons.
 startButton.addEventListener('click', startAction);
@@ -16,7 +11,10 @@ callButton.addEventListener('click', callAction);
 hangupButton.addEventListener('click', hangupAction);
 
 var constraints = { video : true , audio : false };
+
 var serverConfig = null;
+const peerConnection = new RTCPeerConnection(serverConfig);
+
 const offerOptions = {
   offerToReceiveVideo: 1,
 };
@@ -24,16 +22,8 @@ const offerOptions = {
 var localStream;
 var remoteStream;
 
-//------------Signalling------------//
-//var socket = io.connect("http://192.168.1.16:8081/",{secure : true});
+var socket = io.connect("http://192.168.1.16:8081/",{secure : true});
 
-
-
-//---------------------------------//
-
-
-
-//------Getting Local stream-------//
 
   //Setting local stream.
   function gotLocalMediaStream(mediaStream) {
@@ -46,91 +36,85 @@ var remoteStream;
     console.log('navigator.getUserMedia error: ', error);
   }
 
-//-----------------------------------//
-
 // Handles start button action: creates local MediaStream.
 function startAction() {
   startButton.disabled = true;
+  console.log("Local stream added");
   navigator.mediaDevices.getUserMedia(constraints)
     .then(gotLocalMediaStream).catch(handleLocalMediaStreamError);
 }
 
- async function callAction() {	
-   console.log("Call Action Start");
-	//Local
-  const localPeerConnection = new RTCPeerConnection(serverConfig);
-  localPeerConnection.addEventListener('icecandidate', event => {
-    if (event.candidate) {
-		remotePeerConnection.addIceCandidate(event.candidate)
-			.then( () =>{
-				console.log("Local ICE candidate added");
-			}).catch(error => {
-				console.log("Local Ice candidate error ",error);
-			});
+async function callAction() {
+
+    console.log("Call Action start");
+    peerConnection.addStream(localStream);
+    const offer = await peerConnection.createOffer(offerOptions);
+    await peerConnection.setLocalDescription(offer);
+    console.log("Session Description offer sent");
+    socket.emit("sessionDescriptionOffer", offer);
+
+    socket.on("sessionDescriptionAnswer", answer => {
+        if(answer) {
+            console.log("Session Description Response Received");
+            //const remoteDesc = new RTCSessionDescription(message);
+            peerConnection.setRemoteDescription(answer).then(()=>{
+                console.log("Peer remote description set");
+              }).catch(error => {
+                console.log("Peer connection remote description error ",error);
+              });
+        }
+    });
+
+}
+
+socket.on("sessionDescriptionOffer", offer => {
+    if(offer){
+        peerConnection.setRemoteDescription(offer);
+        peerConnection.createAnswer().then((answer)=> {
+            console.log("Answer Created");
+            socket.emit("sessionDescriptionAnswer", answer);
+                peerConnection.setLocalDescription(answer).then(()=>{
+                    console.log("Peer local description set");
+                }).catch(error => {
+                    console.log("Peer connection local description error ",error);
+                });
+        });
     }
-  });
+});
 
-	//Remote
-  const remotePeerConnection = new RTCPeerConnection(serverConfig);
-  remotePeerConnection.addEventListener('icecandidate', event => {
-    if (event.candidate) {
-		localPeerConnection.addIceCandidate(event.candidate)
-		.then( ()=> {
-			console.log("Remote ICE candidate added");
-		}).catch(error => {
-			console.log("Remote Ice candidate error ",error);
-		});
+//Ice Candidate
+//sending iceCandidate data
+peerConnection.addEventListener('icecandidate', event => {
+    if(event.candidate) {
+        console.log("Ice Candidate sent");
+        socket.emit('iceCandidate', event.candidate);
     }
- });
+});
 
- localPeerConnection.addEventListener('connectionstatechange', event => {
-      if (localPeerConnection.connectionState === 'connected') {
-      console.log("Connected");
-      }
-  });
+ //receiving iceCandidate data
+ socket.on('iceCandidate', async iceCandidateData =>{
+    peerConnection.addIceCandidate(iceCandidateData)
+        .then( () =>{
+            console.log("ICE candidate added");
+        }).catch(error => {
+            console.log("Ice candidate error ",error);
+    });
+});
 
-  remotePeerConnection.addEventListener('addstream', (event) => {
+//Connection complete listener
+peerConnection.addEventListener('connectionstatechange', event => {
+    if (peerConnection.connectionState === 'connected') {
+    console.log("Connected");
+    }
+});
+
+//
+peerConnection.addEventListener('addstream', (event) => {
     console.log("AddStream event detected");
-	  remoteVideo.srcObject = event.stream;
-	  remoteStream = event.stream;
+    remoteVideo.srcObject = event.stream;
+    remoteStream = event.stream;
   } );
-  
-  localPeerConnection.addStream(localStream);
 
-  localPeerConnection.createOffer(offerOptions).then((desc)=>{
-      console.log("Offer Created");
-      localPeerConnection.setLocalDescription(desc).then(()=>{
-        console.log("Local Peer local description set");
-      }).catch(error => {
-        console.log("Local peer connection local description error ",error);
-      });
-      remotePeerConnection.setRemoteDescription(desc).then(()=>{
-        console.log("Remote Peer remote description set");
-      }).catch(error => {
-        console.log("Remote peer connection remote description error ",error);
-      });
+  function hangupAction() {
 
-      remotePeerConnection.createAnswer().then((ans)=> {
-        console.log("Answer Created");
-        remotePeerConnection.setLocalDescription(ans).then(()=>{
-          console.log("Remote Peer local description set");
-        }).catch(error => {
-          console.log("Remote peer connection local description error ",error);
-        });
-        localPeerConnection.setRemoteDescription(ans).then(()=>{
-          console.log("Local Peer remote description set");
-        }).catch(error => {
-          console.log("Local peer connection remote description error ",error);
-        });
-      });
-  });
-
-
-  
-}
-function hangupAction() {
-
-}
-
-
-
+  }
