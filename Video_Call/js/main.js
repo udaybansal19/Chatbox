@@ -2,12 +2,14 @@ var localVideo = document.getElementById("localVideo");
 var remoteVideo = document.getElementById("remoteVideo");
 
 const startButton = document.getElementById('startButton');
-const callButton = document.getElementById('callButton');
+//const callButton = document.getElementById('callButton');
+const acceptButton = document.getElementById('acceptButton');
 const hangupButton = document.getElementById('hangupButton');
 
 // Add click event handlers for buttons.
 startButton.addEventListener('click', startAction);
-callButton.addEventListener('click', callAction);
+//callButton.addEventListener('click', callAction);
+acceptButton.addEventListener('click', startAction);
 hangupButton.addEventListener('click', hangupAction);
 
 var constraints = { video : true , audio : false };
@@ -20,7 +22,7 @@ const offerOptions = {
 };
 
 var localStream;
-var remoteStream;
+var remoteStream = new MediaStream();
 
 var socket = io.connect("http://192.168.1.16:8081/",{secure : true});
 
@@ -29,6 +31,10 @@ var socket = io.connect("http://192.168.1.16:8081/",{secure : true});
   function gotLocalMediaStream(mediaStream) {
     localStream = mediaStream;
     localVideo.srcObject = mediaStream;
+    localStream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, localStream);
+    });
+    callAction();
   }
 
   // Error message for local stream.
@@ -39,15 +45,15 @@ var socket = io.connect("http://192.168.1.16:8081/",{secure : true});
 // Handles start button action: creates local MediaStream.
 function startAction() {
   startButton.disabled = true;
+  acceptButton.disabled = true;
   console.log("Local stream added");
   navigator.mediaDevices.getUserMedia(constraints)
     .then(gotLocalMediaStream).catch(handleLocalMediaStreamError);
 }
 
 async function callAction() {
-
     console.log("Call Action start");
-    peerConnection.addStream(localStream);
+    //peerConnection.addStream(localStream);
     const offer = await peerConnection.createOffer(offerOptions);
     await peerConnection.setLocalDescription(offer);
     console.log("Session Description offer sent");
@@ -108,12 +114,19 @@ peerConnection.addEventListener('connectionstatechange', event => {
     }
 });
 
-//
-peerConnection.addEventListener('addstream', (event) => {
-    console.log("AddStream event detected");
-    remoteVideo.srcObject = event.stream;
-    remoteStream = event.stream;
-  } );
+//Add remote stream to DOM object at receiving end
+// peerConnection.addEventListener('addstream', (event) => {
+//     console.log("AddStream event detected");
+//     remoteVideo.srcObject = event.stream;
+//     remoteStream = event.stream;
+//   } );
+
+//Add remote stream to DOM object at sender's side
+peerConnection.addEventListener('track', async (event) => {
+    console.log("Stream received");
+    remoteVideo.srcObject = remoteStream;
+    remoteStream.addTrack(event.track, remoteStream);
+});
 
   function hangupAction() {
 
