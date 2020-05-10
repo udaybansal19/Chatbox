@@ -12,7 +12,7 @@ app.use('/video',express.static("Video_Call"));
 
 var server = http.createServer({
     key: fs.readFileSync('./key.pem'),
-    cert: fs.readFileSync('./cert.pem')
+    cert: fs.readFileSync('./certificate.pem')
 }, app)
 .listen(8081, () =>{
     console.log("Server is running on 8081");
