@@ -129,5 +129,5 @@ peerConnection.addEventListener('track', async (event) => {
 });
 
   function hangupAction() {
-
+    peerConnection.close();
   }
