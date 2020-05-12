@@ -43,3 +43,17 @@ io.on("connection", (socket) =>{
     });
 
 });
+
+const WebSocket = require('ws');
+
+const wss = new WebSocket.Server({server});
+
+wss.on('connection', ws => {
+  ws.on('message', message => {
+    wss.clients.forEach(function each(client) {
+        if (client !== ws && client.readyState === WebSocket.OPEN) {
+          client.send(message);
+        }
+    });
+  });
+});
