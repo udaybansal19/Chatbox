@@ -5,7 +5,7 @@ const https = require('https');
 const fs = require('fs');
 var socket = require('socket.io');
 
-app.use('/',express.static("Video_Call"));
+app.use('/',express.static("Chat"));
 app.use('/chat',express.static("Chat"));
 app.use('/video',express.static("Video_Call"));
 

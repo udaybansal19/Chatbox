@@ -1,12 +1,18 @@
-//var socket = io.connect("http://localhost:8081/",{secure : true});
-
 var output = document.getElementById("output");
 var message = document.getElementById("message");
 var send = document.getElementById("send");
 
-window.addEventListener("load", onLoad);
+message.addEventListener("keyup", function(event) {
 
-var websocket;
+   if (event.keyCode === 13) {
+     // Cancel the default action, if needed
+     event.preventDefault();
+     // Trigger the button element with a click
+     send.click();
+   }
+ });
+
+window.addEventListener("load", onLoad);
 
 function onLoad() {
     var wsUri = "ws://127.0.0.1:8081";
@@ -31,9 +37,6 @@ function onOpen(evt) {
  }
       
  function onMessage(evt) {
-    // There are two types of messages:
-    // 1. a chat participant message itself
-    // 2. a message with a number of connected chat participants
     var message = evt.data;
     output.innerHTML += "<p><b>Stranger: </b>" + message + "</p>";
  }
