@@ -47,8 +47,11 @@ io.on("connection", (socket) =>{
 const WebSocket = require('ws');
 
 const wss = new WebSocket.Server({server});
+var CLIENTS=[];
 
 wss.on('connection', ws => {
+    CLIENTS.push(ws);
+    console.log("New Connection: ID",CLIENTS.length);
   ws.on('message', message => {
     wss.clients.forEach(function each(client) {
         if (client !== ws && client.readyState === WebSocket.OPEN) {
