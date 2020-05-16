@@ -14,7 +14,7 @@ var server = http.createServer({
     key: fs.readFileSync('./key.pem'),
     cert: fs.readFileSync('./certificate.pem')
 }, app)
-.listen(8081, () =>{
+.listen(80, () =>{
     console.log("Server is running on 8081");
 });
 
