@@ -14,7 +14,7 @@ var server = https.createServer({
     key: fs.readFileSync('./tlker.key'),
     cert: fs.readFileSync('./tlker.cert')
 }, app)
-.listen(80, () =>{
+.listen(443, () =>{
     console.log("Server is running on", server.address().port);
 });
 
