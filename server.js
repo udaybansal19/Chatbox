@@ -10,7 +10,7 @@ app.use('/chat',express.static("Chat"));
 app.use('/video',express.static("Video_Call"));
 
 
-var server = http.createServer({
+var server = https.createServer({
     key: fs.readFileSync('./tlker.key'),
     cert: fs.readFileSync('./tlker.cert')
 }, app)
