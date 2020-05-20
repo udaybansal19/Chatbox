@@ -24,7 +24,7 @@ const offerOptions = {
 var localStream;
 var remoteStream = new MediaStream();
 
-var socket = io.connect("http://3.17.66.109:80/",{secure : true});
+var socket = io.connect("https://tlker.live/",{secure : true});
 
 
   //Setting local stream.
