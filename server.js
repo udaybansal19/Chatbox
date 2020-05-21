@@ -10,11 +10,8 @@ app.use('/chat',express.static("Chat"));
 app.use('/video',express.static("Video_Call"));
 
 
-var server = http.createServer({
-    key: fs.readFileSync('./tlker.key'),
-    cert: fs.readFileSync('./tlker.cert')
-}, app)
-.listen(80, () =>{
+var server = http.createServer(app)
+.listen(8081, () =>{
     console.log("Server is running on", server.address().port);
 });
 
@@ -26,8 +23,8 @@ io.on("connection", (socket) =>{
 
     console.log("socket made with " + socket.id);
     socket.on("msg", (data) =>{
-            socket.broadcast.emit("msg",data);
-            console.log(data);
+        socket.broadcast.emit("msg",data);
+        cfonsole.log(data);
     });
     socket.on("iceCandidate", (data) =>{
         socket.broadcast.emit("iceCandidate",data);

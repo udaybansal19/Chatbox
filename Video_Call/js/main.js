@@ -24,7 +24,7 @@ const offerOptions = {
 var localStream;
 var remoteStream = new MediaStream();
 
-var socket = io.connect("http://192.168.1.16:80/",{secure : true});
+var socket = io.connect("http://192.168.1.16:8081/",{secure : true});
 
 
   //Setting local stream.
