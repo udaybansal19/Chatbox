@@ -2,6 +2,7 @@ var output = document.getElementById("output");
 var message = document.getElementById("message");
 var send = document.getElementById("send");
 
+//Enter key listener to send message
 message.addEventListener("keyup", function(event) {
 
    if (event.keyCode === 13) {

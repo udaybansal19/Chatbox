@@ -24,7 +24,72 @@ const offerOptions = {
 var localStream;
 var remoteStream = new MediaStream();
 
-var socket = io.connect("http://192.168.1.16:8081/",{secure : true});
+window.addEventListener("load", onLoad);
+
+function onLoad() {
+    var wsUri = "ws://127.0.0.1:8081";
+    websocket = new WebSocket(wsUri);
+    websocket.onopen = function(evt) { onOpen(evt) };
+    websocket.onclose = function(evt) { onClose(evt) };
+    websocket.onmessage = function(evt) { onMessage(evt) };
+    websocket.onerror = function(evt) { onError(evt) };
+}
+
+function onOpen(evt) {
+  console.log("Signalling Connected");
+}
+    
+function onClose(evt) {
+  console.log("Signalling Disconnected");
+}
+    
+function onMessage(evt) {
+  var message = JSON.parse(evt.data);
+
+  if(message.type === 'sessionDescriptionOffer' ){
+    var offer = message.data;
+    if(offer){
+        peerConnection.setRemoteDescription(offer);
+        peerConnection.createAnswer().then((answer)=> {
+            console.log("Answer Created");
+            send("sessionDescriptionAnswer", answer);
+                peerConnection.setLocalDescription(answer).then(()=>{
+                    console.log("Peer local description set");
+                }).catch(error => {
+                    console.log("Peer connection local description error ",error);
+                });
+        });
+    }
+  }
+
+  if(message.type === 'sessionDescriptionAnswer' ){
+    var answer = message.data;
+    if(answer) {
+            console.log("Session Description Response Received");
+            //const remoteDesc = new RTCSessionDescription(message);
+            peerConnection.setRemoteDescription(answer).then(()=>{
+                console.log("Peer remote description set");
+              }).catch(error => {
+                console.log("Peer connection remote description error ",error);
+              });
+        }
+  }
+
+  if(message.type === 'iceCandidate' ){
+    var iceCandidateData = message.data;
+    peerConnection.addIceCandidate(iceCandidateData)
+        .then( () =>{
+            console.log("ICE candidate added");
+        }).catch(error => {
+            console.log("Ice candidate error ",error);
+    });
+  }
+
+}
+    
+function onError(evt) {
+  console.log("Error: ", evt);
+}
 
 
   //Setting local stream.
@@ -56,70 +121,26 @@ async function callAction() {
     //peerConnection.addStream(localStream);
     const offer = await peerConnection.createOffer(offerOptions);
     await peerConnection.setLocalDescription(offer);
+    send('sessionDescriptionOffer',offer);
     console.log("Session Description offer sent");
-    socket.emit("sessionDescriptionOffer", offer);
-
-    socket.on("sessionDescriptionAnswer", answer => {
-        if(answer) {
-            console.log("Session Description Response Received");
-            //const remoteDesc = new RTCSessionDescription(message);
-            peerConnection.setRemoteDescription(answer).then(()=>{
-                console.log("Peer remote description set");
-              }).catch(error => {
-                console.log("Peer connection remote description error ",error);
-              });
-        }
-    });
 
 }
-
-socket.on("sessionDescriptionOffer", offer => {
-    if(offer){
-        peerConnection.setRemoteDescription(offer);
-        peerConnection.createAnswer().then((answer)=> {
-            console.log("Answer Created");
-            socket.emit("sessionDescriptionAnswer", answer);
-                peerConnection.setLocalDescription(answer).then(()=>{
-                    console.log("Peer local description set");
-                }).catch(error => {
-                    console.log("Peer connection local description error ",error);
-                });
-        });
-    }
-});
 
 //Ice Candidate
 //sending iceCandidate data
 peerConnection.addEventListener('icecandidate', event => {
     if(event.candidate) {
         console.log("Ice Candidate sent");
-        socket.emit('iceCandidate', event.candidate);
+        send('iceCandidate', event.candidate);
     }
-});
-
- //receiving iceCandidate data
- socket.on('iceCandidate', async iceCandidateData =>{
-    peerConnection.addIceCandidate(iceCandidateData)
-        .then( () =>{
-            console.log("ICE candidate added");
-        }).catch(error => {
-            console.log("Ice candidate error ",error);
-    });
 });
 
 //Connection complete listener
 peerConnection.addEventListener('connectionstatechange', event => {
     if (peerConnection.connectionState === 'connected') {
-    console.log("Connected");
+    console.log("WebRTC Connected");
     }
 });
-
-//Add remote stream to DOM object at receiving end
-// peerConnection.addEventListener('addstream', (event) => {
-//     console.log("AddStream event detected");
-//     remoteVideo.srcObject = event.stream;
-//     remoteStream = event.stream;
-//   } );
 
 //Add remote stream to DOM object at sender's side
 peerConnection.addEventListener('track', async (event) => {
@@ -130,4 +151,14 @@ peerConnection.addEventListener('track', async (event) => {
 
   function hangupAction() {
     peerConnection.close();
+  }
+
+  function send(type, data) {
+    if (websocket.readyState === WebSocket.OPEN) {
+      const message = {
+        type : type,
+        data : data
+      }
+      websocket.send(JSON.stringify(message));
+   }
   }

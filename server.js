@@ -15,32 +15,6 @@ var server = http.createServer(app)
     console.log("Server is running on", server.address().port);
 });
 
-
-//----------Signalling--------------//
-var io = socket(server);
-
-io.on("connection", (socket) =>{
-
-    console.log("socket made with " + socket.id);
-    socket.on("msg", (data) =>{
-        socket.broadcast.emit("msg",data);
-        cfonsole.log(data);
-    });
-    socket.on("iceCandidate", (data) =>{
-        socket.broadcast.emit("iceCandidate",data);
-        console.log(data);
-    });
-    socket.on("sessionDescriptionOffer", (data) =>{
-        socket.broadcast.emit("sessionDescriptionOffer",data);
-        console.log(data);
-    });
-    socket.on("sessionDescriptionAnswer", (data) =>{
-        socket.broadcast.emit("sessionDescriptionAnswer",data);
-        console.log(data);
-    });
-
-});
-
 const WebSocket = require('ws');
 
 const wss = new WebSocket.Server({server});
