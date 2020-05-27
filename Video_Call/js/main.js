@@ -139,13 +139,13 @@ peerConnection.addEventListener('icecandidate', event => {
 peerConnection.addEventListener('connectionstatechange', event => {
     if (peerConnection.connectionState === 'connected') {
     console.log("WebRTC Connected");
+    remoteVideo.srcObject = remoteStream;
     }
 });
 
 //Add remote stream to DOM object at sender's side
 peerConnection.addEventListener('track', async (event) => {
     console.log("Stream received");
-    remoteVideo.srcObject = remoteStream;
     remoteStream.addTrack(event.track, remoteStream);
 });
 
