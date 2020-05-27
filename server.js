@@ -3,7 +3,6 @@ var app = express();
 const http = require('http');
 const https = require('https');
 const fs = require('fs');
-var socket = require('socket.io');
 
 app.use('/',express.static("Chat"));
 app.use('/chat',express.static("Chat"));
