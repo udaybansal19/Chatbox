@@ -151,7 +151,6 @@ function startAction() {
 
 async function callAction() {
     console.log("Call Action start");
-    //peerConnection.addStream(localStream);
     const offer = await peerConnection.createOffer(offerOptions);
     await peerConnection.setLocalDescription(offer);
     send('sessionDescriptionOffer',offer);
@@ -180,6 +179,11 @@ peerConnection.addEventListener('connectionstatechange', event => {
 peerConnection.addEventListener('track', async (event) => {
     console.log("Stream received");
     remoteStream.addTrack(event.track, remoteStream);
+    console.log('track event muted = ' + e.track.muted);
+    e.track.onunmute = () => {
+      console.log('track unmuted');
+      remoteVideo.srcObject = e.streams[0];
+    }
 });
 
   function hangupAction() {
