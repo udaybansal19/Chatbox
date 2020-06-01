@@ -147,6 +147,11 @@ peerConnection.addEventListener('connectionstatechange', event => {
 peerConnection.addEventListener('track', async (event) => {
     console.log("Stream received");
     remoteStream.addTrack(event.track, remoteStream);
+    console.log('track event muted = ' + event.track.muted);
+    event.track.onunmute = () => {
+      console.log('track unmuted');
+      remoteVideo.srcObject = event.streams[0];
+    }
 });
 
   function hangupAction() {
