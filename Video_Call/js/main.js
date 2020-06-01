@@ -46,45 +46,49 @@ function onClose(evt) {
 function onMessage(evt) {
   var message = JSON.parse(evt.data);
 
-  if(message.type === 'sessionDescriptionOffer' ){
-    var offer = message.data;
-    if(offer){
-        peerConnection.setRemoteDescription(offer);
-        peerConnection.createAnswer().then((answer)=> {
-            console.log("Answer Created");
-            send("sessionDescriptionAnswer", answer);
-                peerConnection.setLocalDescription(answer).then(()=>{
-                    console.log("Peer local description set");
+  switch(message.type) {
+
+    case "sessionDescriptionOffer":
+      var offer = message.data;
+      if(offer){
+          peerConnection.setRemoteDescription(offer);
+          peerConnection.createAnswer().then((answer)=> {
+              console.log("Answer Created");
+              send("sessionDescriptionAnswer", answer);
+                  peerConnection.setLocalDescription(answer).then(()=>{
+                      console.log("Peer local description set");
+                  }).catch(error => {
+                      console.log("Peer connection local description error ",error);
+                  });
+          });
+      }
+      break;
+
+    case "sessionDescriptionAnswer":
+      var answer = message.data;
+      if(answer) {
+              console.log("Session Description Response Received");
+              //const remoteDesc = new RTCSessionDescription(message);
+              peerConnection.setRemoteDescription(answer).then(()=>{
+                  console.log("Peer remote description set");
                 }).catch(error => {
-                    console.log("Peer connection local description error ",error);
+                  console.log("Peer connection remote description error ",error);
                 });
-        });
-    }
-  }
+          }
+      break;
 
-  if(message.type === 'sessionDescriptionAnswer' ){
-    var answer = message.data;
-    if(answer) {
-            console.log("Session Description Response Received");
-            //const remoteDesc = new RTCSessionDescription(message);
-            peerConnection.setRemoteDescription(answer).then(()=>{
-                console.log("Peer remote description set");
-              }).catch(error => {
-                console.log("Peer connection remote description error ",error);
-              });
-        }
-  }
+    case "iceCandidate":
+      var iceCandidateData = message.data;
+      peerConnection.addIceCandidate(iceCandidateData)
+          .then( () =>{
+              console.log("ICE candidate added");
+          }).catch(error => {
+              console.log("Ice candidate error ",error);
+      });
+      break;
 
-  if(message.type === 'iceCandidate' ){
-    var iceCandidateData = message.data;
-    peerConnection.addIceCandidate(iceCandidateData)
-        .then( () =>{
-            console.log("ICE candidate added");
-        }).catch(error => {
-            console.log("Ice candidate error ",error);
-    });
   }
-
+  
 }
     
 function onError(evt) {
