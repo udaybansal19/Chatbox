@@ -17,16 +17,43 @@ var server = http.createServer(app)
 const WebSocket = require('ws');
 
 const wss = new WebSocket.Server({server});
-var CLIENTS=[];
+var USERS = new Set();
+
+var visitorsNum = 0;
 
 wss.on('connection', ws => {
-    CLIENTS.push(ws);
-    console.log("New Connection: ID",CLIENTS.length);
+
+  visitorsNum++;
+
+  var user = {
+    name: "user",
+    id: visitorsNum,
+    client: ws
+  };
+
+  USERS.add(user);
+  console.log("New Connection opened: ID",visitorsNum);
+
   ws.on('message', message => {
     wss.clients.forEach(function each(client) {
         if (client !== ws && client.readyState === WebSocket.OPEN) {
-          client.send(message);
+          try {
+            client.send(message);
+          } catch(error) {
+            console.log("Failed to send message of user"
+            ,user.id, "with Error", error);
+          }
         }
     });
   });
+
+  ws.on('close', () => {
+    console.log(user.id,"Closed");
+    USERS.delete(user);
+  });
+
+  ws.on('error',  error => {
+    console.log("Error: ",error);
+  });
+
 });

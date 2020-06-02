@@ -168,6 +168,10 @@ peerConnection.addEventListener('track', async (event) => {
         type : type,
         data : data
       }
-      websocket.send(JSON.stringify(message));
+      try{
+        websocket.send(JSON.stringify(message));
+      } catch (error) {
+        console.log("Failed to communicate with server with Error", error);
+      }
    }
   }
