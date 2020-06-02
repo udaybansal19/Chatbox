@@ -144,6 +144,10 @@ peerConnection.addEventListener('connectionstatechange', event => {
     if (peerConnection.connectionState === 'connected') {
     console.log("WebRTC Connected");
     remoteVideo.srcObject = remoteStream;
+
+    remoteVideo.autoplay = true;
+    remoteVideo.playsInline = true;
+    remoteVideo.muted = true;
     }
 });
 
