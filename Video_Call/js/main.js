@@ -49,6 +49,7 @@ function onOpen(evt) {
     
 function onClose(evt) {
   console.log("Signalling Disconnected");
+  onLoad();
 }
     
 function onMessage(evt) {
@@ -209,4 +210,5 @@ peerConnection.addEventListener('track', async (event) => {
   function connectUser(userID) {
     USERS.add(userID);
     console.log("User found ID:", userID);
+    //RTCConnection
   }
