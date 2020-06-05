@@ -14,6 +14,14 @@ hangupButton.addEventListener('click', hangupAction);
 
 var constraints = { video : true , audio : false };
 
+var user = {
+  name: "user",
+  id: null,
+  client: null
+};
+
+var USERS = new Set();
+
 var serverConfig = null;
 const peerConnection = new RTCPeerConnection(serverConfig);
 
@@ -47,6 +55,24 @@ function onMessage(evt) {
   var message = JSON.parse(evt.data);
 
   switch(message.type) {
+
+    case "userData":
+      user = message;
+      break;
+
+    case "currentActive":
+      message.data.forEach(connectUser);
+      break;
+
+    case "newUser":
+      connectUser(message.data);
+      break;
+
+    case "deleteUser":
+      USERS.delete(message.data);
+      console.log("User disconnected ID:", message.data);
+      //Stop RTCPeerConnection
+      break;
 
     case "sessionDescriptionOffer":
       var offer = message.data;
@@ -95,7 +121,6 @@ function onError(evt) {
   console.log("Error: ", evt);
 }
 
-
   //Setting local stream.
   function gotLocalMediaStream(mediaStream) {
     localStream = mediaStream;
@@ -122,7 +147,6 @@ function startAction() {
 
 async function callAction() {
     console.log("Call Action start");
-    //peerConnection.addStream(localStream);
     const offer = await peerConnection.createOffer(offerOptions);
     await peerConnection.setLocalDescription(offer);
     send('sessionDescriptionOffer',offer);
@@ -166,11 +190,13 @@ peerConnection.addEventListener('track', async (event) => {
     peerConnection.close();
   }
 
-  function send(type, data) {
+  function send(type, data, receiver) {
     if (websocket.readyState === WebSocket.OPEN) {
       const message = {
-        type : type,
-        data : data
+        type      :   type,
+        sender    :   user.id,
+        receiver  :   receiver,
+        data      :   data
       }
       try{
         websocket.send(JSON.stringify(message));
@@ -178,4 +204,9 @@ peerConnection.addEventListener('track', async (event) => {
         console.log("Failed to communicate with server with Error", error);
       }
    }
+  }
+
+  function connectUser(userID) {
+    USERS.add(userID);
+    console.log("User found ID:", userID);
   }
