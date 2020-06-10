@@ -17,88 +17,16 @@ var server = http.createServer(app)
 const WebSocket = require('ws');
 
 const wss = new WebSocket.Server({server});
-var activeUsers = new Set();
-var userList = [];
-
-var visitorsNum = 0;
+var CLIENTS=[];
 
 wss.on('connection', ws => {
-
-  visitorsNum++;
-
-  var user = {
-    name: 'user',
-    id: visitorsNum,
-    client: ws
-  };
-
-  //On connection open
-  sendTo('userData',user,0);
-  var existingUsers = [];
-  activeUsers.forEach((userId) => existingUsers.push(userId));
-  sendTo('currentActive',existingUsers,0);
-
-  sendTo('newUser',user.id,-1);
-
-  activeUsers.add(user.id);
-  userList.push(JSON.stringify(user));
-  console.log("New Connection opened: ID",visitorsNum);
-
+    CLIENTS.push(ws);
+    console.log("New Connection: ID",CLIENTS.length);
   ws.on('message', message => {
-   var type = JSON.parse(message).type;
-   var data = JSON.parse(message).data;
-   var recveiver = JSON.parse(message).receiver;
-   
-   sendTo(type,data,recveiver);
-  });
-
-  ws.on('close', () => {
-    console.log(user.id,"Closed");
-    sendTo('deleteUser',user.id,-1);
-    activeUsers.delete(user.id);
-  });
-
-  ws.on('error',  error => {
-    console.log("Error: ",error);
-  });
-
-  function sendTo(type, data, receiver) {
-    
-    const message = JSON.stringify({
-      type      :   type,
-      sender    :   user.id,
-      receiver  :   receiver,
-      data      :   data
+    wss.clients.forEach(function each(client) {
+        if (client !== ws && client.readyState === WebSocket.OPEN) {
+          client.send(message);
+        }
     });
-
-    //  -1  ->  Send to All
-    //  0   ->  Send to self
-    //  >0  ->  Send to given id
-
-    switch(receiver) {
-      
-      case -1:
-        wss.clients.forEach( function each(client) {
-          if (client !== ws && client.readyState === WebSocket.OPEN) {
-            try {
-              client.send(message);
-            } catch(error) {
-              console.log("Failed to send message of user"
-              ,user.id, "with Error", error);
-            }
-          }
-        });
-        break;
-
-      case 0:
-        ws.send(message);
-        break;
-
-      default :
-        (userList[receiver]).client.send(message);
-        break;
-
-    }
-  }
-
+  });
 });

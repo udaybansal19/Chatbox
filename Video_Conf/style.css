@@ -1,0 +1,52 @@
+.chat {
+    margin: auto;
+    width: 510px;
+    height: 500px;
+    margin-top: 50px;
+}
+
+.video-chat {
+    align-content: center;
+}
+
+.icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+  }
+
+#output {
+    background-color: aliceblue;
+    height: -webkit-fill-available;
+}
+
+.send-message {
+    align-content: center;
+    width: 100%;
+    margin: auto;
+}
+
+#message {
+    margin: auto;
+    width: 75%;
+    height: 7%;
+    border-width: medium;
+    border-color: cadetblue;
+    border-radius: 10px;
+}
+#send {
+    background-color: #2196F3;
+    border-radius: 10px;
+    width: 23.5%;
+    height: 7%;
+    color: white;
+}
+
+@media only screen and (max-width: 750px) {
+    .chat {
+        margin: auto;
+        width: 90%;
+        height: 90%;
+        margin-top: 0%;
+    }
+  }
