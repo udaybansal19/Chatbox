@@ -187,6 +187,17 @@ peerConnection.addEventListener('track', async (event) => {
     }
 });
 
+  peerConnection.addEventListener("iceconnectionstatechange", ev => {
+    console.log("%cIceConnection State changed to: " + peerConnection.iceConnectionState,"color:yellow");
+  });
+  console.log("%cIceConnection initial state: " + peerConnection.iceConnectionState,"color:green");
+
+
+  peerConnection.addEventListener("icegatheringstatechange", ev => {
+    console.log("%cIce Gathering State changed to: " + peerConnection.iceGatheringState,"color:yellow");
+  });
+  console.log("%cIce Gathering inital state: " + peerConnection.iceGatheringState,"color:green");
+
   function hangupAction() {
     peerConnection.close();
   }

@@ -1,5 +1,5 @@
 //---Configuration and settings---//
-var wsUri = "ws://127.0.0.1:8081";
+var wsUri = "ws://127.0.0.1:8080";
 const serverConfig = null;
 
 var constraints = { video: true, audio: false };
@@ -126,6 +126,7 @@ function gotLocalMediaStream(mediaStream) {
 	localStream = mediaStream;
 	localVideo.srcObject = mediaStream;
 	localVideo.dispatchEvent(localStreamReady);
+	console.log("%cLocal stream event dispached","color:blue");
 }
 function handleLocalMediaStreamError(error) {
 	console.log('navigator.getUserMedia error: ', error);
@@ -173,21 +174,35 @@ function manageConnection(id, peerConnection) {
 	localVideo.addEventListener('localStreamReady', () => {
 		localStream.getTracks().forEach(track => {
 			peerConnection.addTrack(track, localStream);
+			console.log("%cAdded track","color:blue");
 		});
 	});
 
 	//Ice Candidate
 	//sending iceCandidate data
-	peerConnection.addEventListener('iceCandidate', event => {
+	peerConnection.onicecandidate = event => {
 		if (event.candidate) {
 			console.log("Ice Candidate sent to", id);
 			sendTo('iceCandidate', event.candidate, id);
 		}
+	};
+
+	peerConnection.addEventListener("iceconnectionstatechange", ev => {
+		console.log("%cIceConnection State changed to: " + peerConnection.iceConnectionState,"color:yellow");
 	});
+	console.log("%cIceConnection initial state: " + peerConnection.iceConnectionState,"color:green");
+	
+
+	peerConnection.addEventListener("icegatheringstatechange", ev => {
+		console.log("%cIce Gathering State changed to: " + peerConnection.iceGatheringState,"color:yellow");
+	});
+	console.log("%cIce Gathering inital state: " + peerConnection.iceGatheringState,"color:green");
+
+
 
 	//Add remote Stream
 	peerConnection.addEventListener('track', async (event) => {
-		console.log("Stream Received of ", id);
+		console.log("%cStream Received of " + id,"color:blue");
 		remoteStream.addTrack(event.track, remoteStream);
 		event.track.onmute = () => {
 			remoteVideo.srcObject = event.streams[0];
