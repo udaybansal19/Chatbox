@@ -13,14 +13,14 @@ const offerOptions = {
 var localVideo = document.getElementById("localVideo");
 var remoteVideos = document.getElementById("video-chat");
 
-const connectButton = document.getElementById('connectButton');
-const disconnectButton = document.getElementById('disconnectButton');
+const startButton = document.getElementById('startButton');
+const stopButton = document.getElementById('stopButton');
 
-connectButton.disabled = true;
-disconnectButton.disabled = true;
+startButton.disabled = true;
+stop.disabled = true;
 
-connectButton.addEventListener('click', connect);
-disconnectButton.addEventListener('click', disconnect);
+startButton.addEventListener('click', startStream);
+stopButton.addEventListener('click', disconnect);
 
 var myUser = {
 	id: null,
@@ -45,8 +45,8 @@ function onLoad() {
 
 function onOpen(evt) {
 	console.log("Signalling Connected");
-	connectButton.disabled = false;
-	disconnectButton.disabled = false;
+	startButton.disabled = false;
+	stopButton.disabled = false;
 }
 
 function onClose(evt) {
@@ -68,13 +68,15 @@ function onMessage(evt) {
 			break;
 
 		case 'currentActive':
-			data.forEach((id) => activePeers.add(id));
+			data.forEach((id) => {
+				activePeers.add(id);
+				//connectTo(id);
+			});
 			break;
 
 		case 'newUser':
 			activePeers.add(data);
-			if (connectButton.disabled)
-				connectTo(data);
+			connectTo(data);
 			break;
 
 		case 'deleteUser':
@@ -112,20 +114,16 @@ function onError(evt) {
 	console.log("Signalling Error: ", evt);
 }
 
-function connect() {
-	connectButton.disabled = true;
+function startStream() {
+	startButton.disabled = true;
 	navigator.mediaDevices.getUserMedia(constraints)
 		.then(gotLocalMediaStream).catch(handleLocalMediaStreamError);
-
-	activePeers.forEach(async (id) => {
-		connectTo(id);
-	});
-
 }
 function gotLocalMediaStream(mediaStream) {
 	localStream = mediaStream;
 	localVideo.srcObject = mediaStream;
 	localVideo.dispatchEvent(localStreamReady);
+	//TODO: Add stream to the all the rtc connection and renegotiate offers
 	console.log("%cLocal stream event dispached","color:Aqua");
 }
 function handleLocalMediaStreamError(error) {
@@ -140,7 +138,6 @@ function connectTo(id) {
 			console.log("Offer Created");
 			peerConnection.setLocalDescription(offer).then(() => {
 				console.log("Peer local description set");
-				console.log(offer);
 			}).catch(error => {
 				console.log("Peer connection local description error ", error);
 			});
@@ -164,23 +161,22 @@ function acceptConnection(id, offer) {
 			sendTo('sessionDescriptionAnswer', answer, id);
 		});
 	manageConnection(id, peerConnection);
-
 }
 
 function manageConnection(id, peerConnection) {
-	var remoteStream;
-	var remoteVideo = document.createElement("video");
-	remoteVideos.appendChild(remoteVideo);
+	// var remoteStream;
+	// var remoteVideo = document.createElement("video");
+	// remoteVideos.appendChild(remoteVideo);
 
-	localVideo.addEventListener('localStreamReady', () => {
-		localStream.getTracks().forEach(track => {
-			peerConnection.addTrack(track,localStream);
-			console.log("%cAdded track","color:Aqua");
-			console.log(track);
-			console.log(peerConnection.getRemoteStreams());
-			console.log(peerConnection.getLocalStreams());
-		});
-	});
+	// localVideo.addEventListener('localStreamReady', () => {
+	// 	localStream.getTracks().forEach(track => {
+	// 		peerConnection.addTrack(track,localStream);
+	// 		console.log("%cAdded track","color:Aqua");
+	// 		console.log(track);
+	// 		console.log(peerConnection.getRemoteStreams());
+	// 		console.log(peerConnection.getLocalStreams());
+	// 	});
+	// });
 
 	//Ice Candidate
 	//sending iceCandidate data
@@ -204,34 +200,34 @@ function manageConnection(id, peerConnection) {
 
 
 
-	//Add remote Stream
-	peerConnection.addEventListener('track', (event) => {
-		console.log("%cStream Received of " + id,"color:Aqua");
-		remoteStream.addTrack(event.track);
-		remoteVideo.srcObject = event.streams[0];
-		// event.track.onmute = () => {
-		// 	remoteVideo.srcObject = event.streams[0];
-		// }
-	});
-	peerConnection.ontrack = (event) => {
-		console.log("%cStream Received of " + id,"color:Aqua");
-		remoteStream.addTrack(event.track);
-		remoteVideo.srcObject = event.streams[0];
-		// event.track.onmute = () => {
-		// 	remoteVideo.srcObject = event.streams[0];
-		// }
-	};
+	// //Add remote Stream
+	// peerConnection.addEventListener('track', (event) => {
+	// 	console.log("%cStream Received of " + id,"color:Aqua");
+	// 	remoteStream.addTrack(event.track);
+	// 	remoteVideo.srcObject = event.streams[0];
+	// 	// event.track.onmute = () => {
+	// 	// 	remoteVideo.srcObject = event.streams[0];
+	// 	// }
+	// });
+	// peerConnection.ontrack = (event) => {
+	// 	console.log("%cStream Received of " + id,"color:Aqua");
+	// 	remoteStream.addTrack(event.track);
+	// 	remoteVideo.srcObject = event.streams[0];
+	// 	// event.track.onmute = () => {
+	// 	// 	remoteVideo.srcObject = event.streams[0];
+	// 	// }
+	// };
 
 
 	//Connection Complete
 	peerConnection.addEventListener('connectionstatechange', event => {
 		if (peerConnection.connectionState === 'connected') {
-			console.log("WebRTC Connected with ", id);
+			console.log("%cWebRTC Connected with " + id,"color:Chartreuse");
 
-			remoteVideo.srcObject = peers.get(id).remoteStream;
-			remoteVideo.autoplay = true;
-			remoteVideo.playsInline = true;
-			remoteVideo.muted = true;
+			// remoteVideo.srcObject = peers.get(id).remoteStream;
+			// remoteVideo.autoplay = true;
+			// remoteVideo.playsInline = true;
+			// remoteVideo.muted = true;
 		}
 	});
 
@@ -239,8 +235,8 @@ function manageConnection(id, peerConnection) {
 		id: id,
 		name: 'user',
 		peerConnection: peerConnection,
-		remoteStream: remoteStream,
-		remoteVideo: remoteVideo
+		// remoteStream: remoteStream,
+		// remoteVideo: remoteVideo
 	}
 	peers.set(id, peer);
 }
