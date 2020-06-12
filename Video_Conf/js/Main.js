@@ -126,7 +126,7 @@ function gotLocalMediaStream(mediaStream) {
 	localStream = mediaStream;
 	localVideo.srcObject = mediaStream;
 	localVideo.dispatchEvent(localStreamReady);
-	console.log("%cLocal stream event dispached","color:blue");
+	console.log("%cLocal stream event dispached","color:Aqua");
 }
 function handleLocalMediaStreamError(error) {
 	console.log('navigator.getUserMedia error: ', error);
@@ -140,6 +140,7 @@ function connectTo(id) {
 			console.log("Offer Created");
 			peerConnection.setLocalDescription(offer).then(() => {
 				console.log("Peer local description set");
+				console.log(offer);
 			}).catch(error => {
 				console.log("Peer connection local description error ", error);
 			});
@@ -173,8 +174,11 @@ function manageConnection(id, peerConnection) {
 
 	localVideo.addEventListener('localStreamReady', () => {
 		localStream.getTracks().forEach(track => {
-			peerConnection.addTrack(track, localStream);
-			console.log("%cAdded track","color:blue");
+			peerConnection.addTrack(track,localStream);
+			console.log("%cAdded track","color:Aqua");
+			console.log(track);
+			console.log(peerConnection.getRemoteStreams());
+			console.log(peerConnection.getLocalStreams());
 		});
 	});
 
@@ -201,13 +205,23 @@ function manageConnection(id, peerConnection) {
 
 
 	//Add remote Stream
-	peerConnection.addEventListener('track', async (event) => {
-		console.log("%cStream Received of " + id,"color:blue");
-		remoteStream.addTrack(event.track, remoteStream);
-		event.track.onmute = () => {
-			remoteVideo.srcObject = event.streams[0];
-		}
+	peerConnection.addEventListener('track', (event) => {
+		console.log("%cStream Received of " + id,"color:Aqua");
+		remoteStream.addTrack(event.track);
+		remoteVideo.srcObject = event.streams[0];
+		// event.track.onmute = () => {
+		// 	remoteVideo.srcObject = event.streams[0];
+		// }
 	});
+	peerConnection.ontrack = (event) => {
+		console.log("%cStream Received of " + id,"color:Aqua");
+		remoteStream.addTrack(event.track);
+		remoteVideo.srcObject = event.streams[0];
+		// event.track.onmute = () => {
+		// 	remoteVideo.srcObject = event.streams[0];
+		// }
+	};
+
 
 	//Connection Complete
 	peerConnection.addEventListener('connectionstatechange', event => {
