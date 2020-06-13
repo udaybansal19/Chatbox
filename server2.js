@@ -46,9 +46,14 @@ wss.on('connection', ws => {
   console.log("New Connection opened: ID",visitorsNum);
 
   ws.on('message', message => {
-   var type = JSON.parse(message).type;
-   var data = JSON.parse(message).data;
-   var recveiver = JSON.parse(message).receiver;
+    try {
+      var type = JSON.parse(message).type;
+      var data = JSON.parse(message).data;
+      var recveiver = JSON.parse(message).receiver;
+    } catch(error) {
+      console.error("Error with message: " + message);
+    }
+   
    
    sendTo(type,data,recveiver);
   });
