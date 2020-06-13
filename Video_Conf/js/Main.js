@@ -27,6 +27,15 @@ var myUser = {
 	name: 'user'
 }
 
+const log = {
+	error:1,
+	warn:2,
+	log:3,
+	info:4,
+	debug:5
+}
+Object.freeze(log);
+
 var localStream;
 var activePeers = new Set();
 var peers = new Map();
@@ -44,13 +53,13 @@ function onLoad() {
 }
 
 function onOpen(evt) {
-	console.log("Signalling Connected");
+	logger("Signalling Connected",log.info);
 	startButton.disabled = false;
 	stopButton.disabled = false;
 }
 
 function onClose(evt) {
-	console.log("Signalling Disconnected");
+	logger("Signalling Disconnected",log.info);
 	onLoad();
 }
 
@@ -59,11 +68,11 @@ function onMessage(evt) {
 	var from = message.sender;
 	var data = message.data;
 
-	console.log("Received", message.type, "from", from);
+	logger("Received " +  message.type + " from " + from,log.log);
 
 	switch (message.type) {
 		case 'userData':
-			console.log("%cMy id is " + data,"color:Gold");
+			logger("My id is " + data,log.info);
 			myUser.id = data;
 			break;
 
@@ -83,7 +92,7 @@ function onMessage(evt) {
 			break;
 
 		case 'sessionDescriptionOffer':
-			console.log("Received offer from", from);
+			logger("Received offer from" + from,log.log);
 			var offer = data;
 			if (offer) {
 				acceptConnection(from, offer);
@@ -100,9 +109,9 @@ function onMessage(evt) {
 		case 'iceCandidate':
 			peers.get(from).peerConnection.addIceCandidate(data)
 				.then(() => {
-					console.log("ICE candidate added");
+					logger("ICE candidate added", log.log);
 				}).catch(error => {
-					console.log("Ice candidate error ", error);
+					logger("Ice candidate error " + error, log.error);
 				});
 			break;
 
@@ -110,7 +119,7 @@ function onMessage(evt) {
 }
 
 function onError(evt) {
-	console.log("Signalling Error: ", evt);
+	logger("Signalling Error: " + evt, log.error);
 }
 
 function startStream() {
@@ -123,24 +132,21 @@ function gotLocalMediaStream(mediaStream) {
 	localVideo.srcObject = mediaStream;
 	localVideo.dispatchEvent(localStreamReady);
 	//TODO: Add stream to the all the rtc connection and renegotiate offers
-	console.log("%cLocal stream event dispached","color:Aqua");
 }
 function handleLocalMediaStreamError(error) {
-	console.log('navigator.getUserMedia error: ', error);
+	logger('navigator.getUserMedia error: ' + error, log.error);
 }
 
 function connectTo(id) {
-	console.log("Connecting to", id);
+	logger("Connecting to" + id, log.log);
 	const peerConnection = new RTCPeerConnection(serverConfig);
 	const dataChannel = peerConnection.createDataChannel("DataChannel");
 	dataTransfer(id, dataChannel);
 	peerConnection.createOffer(offerOptions)
 		.then((offer) => {
-			console.log("Offer Created");
 			peerConnection.setLocalDescription(offer).then(() => {
-				console.log("Peer local description set");
 			}).catch(error => {
-				console.log("Peer connection local description error ", error);
+				logger("Peer connection local description error " + error, log.error);
 			});
 			sendTo('sessionDescriptionOffer', offer, id);
 		});
@@ -149,23 +155,19 @@ function connectTo(id) {
 }
 
 function acceptConnection(id, offer) {
-	console.log("Accepting connection from", id);
+	logger("Accepting connection from" + id, log.log);
 	const peerConnection = new RTCPeerConnection(serverConfig);
 	
 	peerConnection.addEventListener('datachannel', event => {
 		const dataChannel = event.channel;
-		console.log("%cFLAG","color:red");
-		console.log(dataChannel);
 		dataTransfer(id,dataChannel);
 	});
 	peerConnection.setRemoteDescription(offer);
 	peerConnection.createAnswer()
 		.then((answer) => {
-			console.log("Answer created");
 			peerConnection.setLocalDescription(answer).then(() => {
-				console.log("Peer local description set");
 			}).catch(error => {
-				console.log("Peer connection local description error ", error);
+				logger("Peer connection local description error " + error, log.error);
 			});
 			sendTo('sessionDescriptionAnswer', answer, id);
 		});
@@ -174,85 +176,39 @@ function acceptConnection(id, offer) {
 
 function dataTransfer(id, dataChannel) {
 	dataChannel.addEventListener('open', event => {
-		console.log("%cData Channel opened with: " + id,"color:red");
+		logger("Data Channel opened with: " + id, log.debug);
 		dataChannel.send("Hello From " + myUser.id);
 	});
 	
 	dataChannel.addEventListener('close', event => {
-		console.log("%cData Channel closed with: " + id,"color:red");
+		logger("Data Channel closed with: " + id, log.debug);
 	});
 
 	dataChannel.addEventListener('message', event => {
 		const message = event.data;
-		console.log("%c Received" + message,"color:red");
+		logger("Received" + message, log.debug);
 	});
 
 }
 
 function manageConnection(id, peerConnection) {
-	// var remoteStream;
-	// var remoteVideo = document.createElement("video");
-	// remoteVideos.appendChild(remoteVideo);
-
-	// localVideo.addEventListener('localStreamReady', () => {
-	// 	localStream.getTracks().forEach(track => {
-	// 		peerConnection.addTrack(track,localStream);
-	// 		console.log("%cAdded track","color:Aqua");
-	// 		console.log(track);
-	// 		console.log(peerConnection.getRemoteStreams());
-	// 		console.log(peerConnection.getLocalStreams());
-	// 	});
-	// });
 
 	//Ice Candidate
 	//sending iceCandidate data
 	peerConnection.onicecandidate = event => {
 		if (event.candidate) {
-			console.log("Ice Candidate sent to", id);
 			sendTo('iceCandidate', event.candidate, id);
 		}
 	};
-
-	peerConnection.addEventListener("iceconnectionstatechange", ev => {
-		console.log("%cIceConnection State changed to: " + peerConnection.iceConnectionState,"color:yellow");
-	});
-	console.log("%cIceConnection initial state: " + peerConnection.iceConnectionState,"color:green");
-	
-
-	peerConnection.addEventListener("icegatheringstatechange", ev => {
-		console.log("%cIce Gathering State changed to: " + peerConnection.iceGatheringState,"color:yellow");
-	});
-	console.log("%cIce Gathering inital state: " + peerConnection.iceGatheringState,"color:green");
-
-
-
-	// //Add remote Stream
-	// peerConnection.addEventListener('track', (event) => {
-	// 	console.log("%cStream Received of " + id,"color:Aqua");
-	// 	remoteStream.addTrack(event.track);
-	// 	remoteVideo.srcObject = event.streams[0];
-	// 	// event.track.onmute = () => {
-	// 	// 	remoteVideo.srcObject = event.streams[0];
-	// 	// }
-	// });
-	// peerConnection.ontrack = (event) => {
-	// 	console.log("%cStream Received of " + id,"color:Aqua");
-	// 	remoteStream.addTrack(event.track);
-	// 	remoteVideo.srcObject = event.streams[0];
-	// 	// event.track.onmute = () => {
-	// 	// 	remoteVideo.srcObject = event.streams[0];
-	// 	// }
-	// };
-
 
 	//WebRTC connection status
 	peerConnection.addEventListener('connectionstatechange', event => {
 		switch(peerConnection.connectionState) {
 			case 'connected':
-				console.log("%cWebRTC Connected with " + id,"color:Chartreuse");
+				logger("WebRTC Connected with " + id, log.info);
 				break;
 			case 'disconnected':
-				console.log("%cWebRTC Disonnected with " + id,"color:Chartreuse");
+				logger("WebRTC Disonnected with " + id, log.info);
 				break;
 			default:
 				break;			
@@ -270,7 +226,7 @@ function manageConnection(id, peerConnection) {
 }
 
 function disconnect() {
-
+	//TODO
 }
 
 function sendTo(type, data, receiver) {
@@ -281,11 +237,40 @@ function sendTo(type, data, receiver) {
 			receiver: receiver,
 			data: data
 		}
-		console.log("Sending", type, "to", receiver);
 		try {
 			websocket.send(JSON.stringify(message));
 		} catch (error) {
-			console.log("Failed to communicate with server with Error", error);
+			logger("Failed to communicate with server with Error" + error, log.error);
 		}
 	}
+}
+
+
+function logger(message, type) {
+	switch(type) {
+		case 1:
+			console.error(message);
+			break;
+
+		case 2:
+			console.warn(message);
+			break;
+
+		case 3:
+			//console.log(message);
+			break;
+
+		case 4:
+			console.log(`%c ${message}`,"color:Chartreuse");
+			break;
+
+		case 5:
+			console.log(`%c ${message}`,"color:yellow");
+			break;
+
+		default:
+			console.log(message);
+			break;
+	}
+
 }

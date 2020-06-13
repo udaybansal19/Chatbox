@@ -95,7 +95,12 @@ wss.on('connection', ws => {
         break;
 
       default :
+      try{
         (userList.get(receiver)).client.send(message);
+      } catch(error) {
+        console.log("Error message: " + message);
+      }
+        
         break;
 
     }
