@@ -63,14 +63,13 @@ function onMessage(evt) {
 
 	switch (message.type) {
 		case 'userData':
-			console.log("My id is", data);
+			console.log("%cMy id is " + data,"color:Gold");
 			myUser.id = data;
 			break;
 
 		case 'currentActive':
 			data.forEach((id) => {
 				activePeers.add(id);
-				//connectTo(id);
 			});
 			break;
 
@@ -133,6 +132,8 @@ function handleLocalMediaStreamError(error) {
 function connectTo(id) {
 	console.log("Connecting to", id);
 	const peerConnection = new RTCPeerConnection(serverConfig);
+	const dataChannel = peerConnection.createDataChannel("DataChannel");
+	dataTransfer(id, dataChannel);
 	peerConnection.createOffer(offerOptions)
 		.then((offer) => {
 			console.log("Offer Created");
@@ -143,12 +144,20 @@ function connectTo(id) {
 			});
 			sendTo('sessionDescriptionOffer', offer, id);
 		});
+
 	manageConnection(id, peerConnection);
 }
 
 function acceptConnection(id, offer) {
 	console.log("Accepting connection from", id);
 	const peerConnection = new RTCPeerConnection(serverConfig);
+	
+	peerConnection.addEventListener('datachannel', event => {
+		const dataChannel = event.channel;
+		console.log("%cFLAG","color:red");
+		console.log(dataChannel);
+		dataTransfer(id,dataChannel);
+	});
 	peerConnection.setRemoteDescription(offer);
 	peerConnection.createAnswer()
 		.then((answer) => {
@@ -161,6 +170,23 @@ function acceptConnection(id, offer) {
 			sendTo('sessionDescriptionAnswer', answer, id);
 		});
 	manageConnection(id, peerConnection);
+}
+
+function dataTransfer(id, dataChannel) {
+	dataChannel.addEventListener('open', event => {
+		console.log("%cData Channel opened with: " + id,"color:red");
+		dataChannel.send("Hello From " + myUser.id);
+	});
+	
+	dataChannel.addEventListener('close', event => {
+		console.log("%cData Channel closed with: " + id,"color:red");
+	});
+
+	dataChannel.addEventListener('message', event => {
+		const message = event.data;
+		console.log("%c Received" + message,"color:red");
+	});
+
 }
 
 function manageConnection(id, peerConnection) {
@@ -219,15 +245,17 @@ function manageConnection(id, peerConnection) {
 	// };
 
 
-	//Connection Complete
+	//WebRTC connection status
 	peerConnection.addEventListener('connectionstatechange', event => {
-		if (peerConnection.connectionState === 'connected') {
-			console.log("%cWebRTC Connected with " + id,"color:Chartreuse");
-
-			// remoteVideo.srcObject = peers.get(id).remoteStream;
-			// remoteVideo.autoplay = true;
-			// remoteVideo.playsInline = true;
-			// remoteVideo.muted = true;
+		switch(peerConnection.connectionState) {
+			case 'connected':
+				console.log("%cWebRTC Connected with " + id,"color:Chartreuse");
+				break;
+			case 'disconnected':
+				console.log("%cWebRTC Disonnected with " + id,"color:Chartreuse");
+				break;
+			default:
+				break;			
 		}
 	});
 
