@@ -28,19 +28,3 @@ function onMessage(evt) {
 function onError(evt) {
 	logger("Signalling Error: " + evt, log.error);
 }
-
-function sendTo(type, data, receiver) {
-	if (websocket.readyState === WebSocket.OPEN) {
-		const message = {
-			type: type,
-			sender: myUser.id,
-			receiver: receiver,
-			data: data
-		}
-		try {
-			websocket.send(JSON.stringify(message));
-		} catch (error) {
-			logger("Failed to communicate with server with Error" + error, log.error);
-		}
-	}
-}

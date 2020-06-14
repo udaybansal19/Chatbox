@@ -49,29 +49,62 @@ var localStreamReady = new Event('localStreamReady');
 // 	logger('navigator.getUserMedia error: ' + error, log.error);
 // }
 
+function initPeer(id) {
+
+	const peerConnection = new RTCPeerConnection(serverConfig);
+	
+	var peer = {
+		id: id,
+		name: 'user',
+		peerConnection: peerConnection,
+		dataChannel: null,
+		// remoteStream: remoteStream,
+		// remoteVideo: remoteVideo
+	}
+	peers.set(id, peer);
+}
 
 function connectTo(id) {
 	logger("Connecting to" + id, log.log);
-	const peerConnection = new RTCPeerConnection(serverConfig);
-	const dataChannel = peerConnection.createDataChannel("DataChannel");
-	dataTransfer(id, dataChannel);
-	createOffer(id, peerConnection);
-	manageConnection(id, peerConnection);
+	
+	initPeer(id);
+	peers.get(id).dataChannel = peers.get(id).peerConnection.createDataChannel("DataChannel");
+	dataTransfer(id);
+	createOffer(id);
+	manageConnection(id);
 }
 
 function acceptConnection(id, offer) {
 	logger("Accepting connection from" + id, log.log);
-	const peerConnection = new RTCPeerConnection(serverConfig);
 	
-	peerConnection.addEventListener('datachannel', event => {
-		const dataChannel = event.channel;
-		dataTransfer(id,dataChannel);
+	initPeer(id);
+	
+	peers.get(id).peerConnection.addEventListener('datachannel', event => {
+		peers.get(id).dataChannel = event.channel;
+		dataTransfer(id);
 	});
 
-	createAnswer(id, peerConnection, offer);
-	manageConnection(id, peerConnection);
+	createAnswer(id, offer);
+	manageConnection(id,);
 }
 
 function disconnect() {
 	//TODO
+}
+
+function sendTo(type, data, receiver) {
+	if (websocket.readyState === WebSocket.OPEN) {
+		const message = {
+			type: type,
+			sender: myUser.id,
+			receiver: receiver,
+			data: data
+		}
+		try {
+			websocket.send(JSON.stringify(message));
+			logger("Sending " + type + " to " + receiver, log.log);
+		} catch (error) {
+			logger("Failed to communicate with server with Error" + error, log.error);
+		}
+	}
 }

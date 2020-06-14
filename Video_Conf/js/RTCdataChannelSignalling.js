@@ -1,4 +1,5 @@
-function dataTransfer(id, dataChannel) {
+function dataTransfer(id) {
+	const dataChannel = peers.get(id).dataChannel;
 	dataChannel.addEventListener('open', event => {
 		logger("Data Channel opened with: " + id, log.debug);
 		dataChannel.send("Hello From " + myUser.id);

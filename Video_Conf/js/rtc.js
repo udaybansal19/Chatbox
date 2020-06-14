@@ -1,4 +1,5 @@
-function createOffer(id, peerConnection) {
+function createOffer(id) {
+	const peerConnection = peers.get(id).peerConnection;
     peerConnection.createOffer(offerOptions)
 		.then((offer) => {
 			peerConnection.setLocalDescription(offer).then(() => {
@@ -9,7 +10,8 @@ function createOffer(id, peerConnection) {
 		});
 }
 
-function createAnswer(id, peerConnection, offer) {
+function createAnswer(id, offer) {
+	const peerConnection = peers.get(id).peerConnection;
     peerConnection.setRemoteDescription(offer);
 	peerConnection.createAnswer()
 		.then((answer) => {
@@ -77,7 +79,9 @@ function receivedMessage(message) {
 	}
 }
 
-function manageConnection(id, peerConnection) {
+function manageConnection(id) {
+
+	const peerConnection = peers.get(id).peerConnection;
 
 	//Ice Candidate
 	//sending iceCandidate data
@@ -86,6 +90,10 @@ function manageConnection(id, peerConnection) {
 			sendTo('iceCandidate', event.candidate, id);
 		}
 	};
+
+	// peerConnection.addEventListener("negotiationneeded", ev => {
+	// 	logger("Negotiation Needed", log.debug);
+	// });
 
 	//WebRTC connection status
 	peerConnection.addEventListener('connectionstatechange', event => {
@@ -101,12 +109,4 @@ function manageConnection(id, peerConnection) {
 		}
 	});
 
-	var peer = {
-		id: id,
-		name: 'user',
-		peerConnection: peerConnection,
-		// remoteStream: remoteStream,
-		// remoteVideo: remoteVideo
-	}
-	peers.set(id, peer);
 }

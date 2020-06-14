@@ -27,7 +27,7 @@ function logger(message, type) {
 			break;
 
 		case 5:
-			console.log(`%c ${message}`,"color:yellow");
+			//console.log(`%c ${message}`,"color:yellow");
 			break;
 
 		default:
