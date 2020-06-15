@@ -7,7 +7,7 @@ const fs = require('fs');
 app.use('/',express.static("Chat"));
 app.use('/chat',express.static("Chat"));
 app.use('/video',express.static("Video_Call"));
-app.use('/conf', express.static("Video_Conf"));
+app.use('/conf', express.static("Conf"));
 
 
 var server = http.createServer(app)

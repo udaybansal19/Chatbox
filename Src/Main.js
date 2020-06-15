@@ -27,6 +27,14 @@ var myUser = {
 	name: 'user'
 }
 
+//Signalling codes
+const signallingMethod = {
+	websockets: 1,
+	dataChannel: 2,
+	routingChannel: 3 
+}
+Object.freeze(signallingMethod);
+
 var localStream;
 var activePeers = new Set();
 var peers = new Map();
@@ -58,6 +66,7 @@ function initPeer(id) {
 		name: 'user',
 		peerConnection: peerConnection,
 		dataChannel: null,
+		signallingMethod: signallingMethod.websockets,
 		// remoteStream: remoteStream,
 		// remoteVideo: remoteVideo
 	}
@@ -93,18 +102,47 @@ function disconnect() {
 }
 
 function sendTo(type, data, receiver) {
-	if (websocket.readyState === WebSocket.OPEN) {
-		const message = {
-			type: type,
-			sender: myUser.id,
-			receiver: receiver,
-			data: data
+	const message = {
+		type: type,
+		sender: myUser.id,
+		receiver: receiver,
+		data: data
+	}
+	if(receiver == -1) {
+		sendViaWebsockets(message);
+	}
+	else {
+		const signallingMethod = peers.get(receiver).signallingMethod;
+		switch(signallingMethod) {
+			case 1:
+				sendViaWebsockets(message);
+				break;
+			case 2:
+				sendViaDataChannel(message);
+				break;
+			case 3:
+				//TODO: Route data through peers
+				break;
 		}
-		try {
-			websocket.send(JSON.stringify(message));
-			logger("Sending " + type + " to " + receiver, log.log);
-		} catch (error) {
-			logger("Failed to communicate with server with Error" + error, log.error);
-		}
+	}
+}
+
+function sendViaWebsockets(message) {
+
+	try {
+		websocket.send(JSON.stringify(message));
+		logger("Sending " + message.type + " to " + message.receiver, log.log);
+	} catch (error) {
+		logger("Failed to communicate with server with Error" + error, log.error);
+	}
+
+}
+
+function sendViaDataChannel(message) {
+	try {
+		peers.get(message.receiver).dataChannel.send(JSON.stringify(message));
+		logger("Sending " + message.type + " to " + message.receiver, log.log);
+	} catch (error) {
+		logger("Failed to communicate with " + message.receiver + " via dataChannel with Error" + error, log.error);
 	}
 }

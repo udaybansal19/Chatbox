@@ -2,7 +2,7 @@ function dataTransfer(id) {
 	const dataChannel = peers.get(id).dataChannel;
 	dataChannel.addEventListener('open', event => {
 		logger("Data Channel opened with: " + id, log.debug);
-		dataChannel.send("Hello From " + myUser.id);
+		peers.get(id).signallingMethod = signallingMethod.dataChannel;
 	});
 	
 	dataChannel.addEventListener('close', event => {
@@ -10,8 +10,10 @@ function dataTransfer(id) {
 	});
 
 	dataChannel.addEventListener('message', event => {
-		const message = event.data;
+		var message = JSON.parse(evt.data);
+		receivedMessage(message);
 		logger("Received" + message, log.debug);
+
 	});
 
 }

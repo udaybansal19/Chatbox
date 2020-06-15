@@ -1,10 +1,11 @@
 {
   "name": "chatbox",
   "version": "1.0.0",
-  "description": "",
+  "description": "Chat with your friends on the local network",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha",
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
@@ -14,5 +15,18 @@
     "https": "^1.0.0",
     "webrtc": "^1.14.1",
     "ws": "^7.3.0"
-  }
+  },
+  "devDependencies": {
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/udaybansal19/Chatbox.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/udaybansal19/Chatbox/issues"
+  },
+  "homepage": "https://github.com/udaybansal19/Chatbox#readme"
 }
