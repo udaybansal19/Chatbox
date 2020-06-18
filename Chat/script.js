@@ -16,7 +16,7 @@ message.addEventListener("keyup", function(event) {
 window.addEventListener("load", onLoad);
 
 function onLoad() {
-    var wsUri = "ws://127.0.0.1:8081";
+    var wsUri = "ws://127.0.0.1:8080";
     websocket = new WebSocket(wsUri);
     websocket.onopen = function(evt) { onOpen(evt) };
     websocket.onclose = function(evt) { onClose(evt) };
