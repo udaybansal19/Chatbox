@@ -2,9 +2,9 @@ var path = require('path');
 
 module.exports = {
   mode: 'development',
-  entry: './Src/Main.js',
+  entry: './Src/index.js',
   output: {
-    path: path.resolve(__dirname, 'Chat'),
+    path: path.resolve(__dirname, 'Conf'),
     filename: 'main.bundle.js'
   }
 };
