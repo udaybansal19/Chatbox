@@ -1,4 +1,5 @@
 const connectus = require('C:\\Users\\dell\\Downloads\\connectUs');
+const webrtcAdapter = require('webrtc-adapter');
 
 var wsUri = "ws://127.0.0.1:8080"
 
@@ -29,6 +30,8 @@ function start() {
 function gotLocalMediaStream(mediaStream) {
     localStream = mediaStream;
     localVideo.srcObject = mediaStream;
+    console.log(localStream);
+    console.log(localStream.getTracks());
     connectus.addLocalStream(localStream.getTracks(), localStream);
   }
 

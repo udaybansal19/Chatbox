@@ -178,7 +178,7 @@ peerConnection.addEventListener('connectionstatechange', event => {
 
 //Add remote stream to DOM object at sender's side
 peerConnection.addEventListener('track', async (event) => {
-    console.log("Stream received");
+    console.log("Stream received"); 
     remoteStream.addTrack(event.track, remoteStream);
     console.log('track event muted = ' + event.track.muted);
     event.track.onunmute = () => {
@@ -222,4 +222,4 @@ peerConnection.addEventListener('track', async (event) => {
     USERS.add(userID);
     console.log("User found ID:", userID);
     //RTCConnection
-  }
+  } 
