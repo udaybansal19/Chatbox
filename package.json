@@ -4,16 +4,19 @@
   "description": "Chat with your friends on the local network",
   "main": "index.js",
   "scripts": {
-    "test": "mocha",
+    "test": "mocha test/bootstrap.js --recursive test",
     "start": "nodemon server2.js",
     "build": "npx webpack --watch"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "chai": "^4.2.0",
     "express": "^4.17.1",
     "fs": "0.0.1-security",
     "https": "^1.0.0",
+    "lodash": "^4.17.15",
+    "puppeteer": "^5.0.0",
     "webrtc": "^1.14.1",
     "webrtc-adapter": "^7.6.2",
     "ws": "^7.3.0"

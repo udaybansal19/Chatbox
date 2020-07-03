@@ -126,6 +126,7 @@ function onError(evt) {
   function gotLocalMediaStream(mediaStream) {
     localStream = mediaStream;
     localVideo.srcObject = mediaStream;
+    console.log(localStream.getTracks());
     localStream.getTracks().forEach(track => {
         peerConnection.addTrack(track, localStream);
     });
@@ -164,26 +165,30 @@ peerConnection.addEventListener('icecandidate', event => {
     }
 });
 
+peerConnection.addEventListener('negotiationneeded', event => {
+  console.log("%cNegotiation Needed","color: yellow");
+});
+
 //Connection complete listener
 peerConnection.addEventListener('connectionstatechange', event => {
     if (peerConnection.connectionState === 'connected') {
     console.log("WebRTC Connected");
     remoteVideo.srcObject = remoteStream;
 
-    remoteVideo.autoplay = true;
-    remoteVideo.playsInline = true;
-    remoteVideo.muted = true;
+    //remoteVideo.autoplay = true;
+    //remoteVideo.playsInline = true;
+    //remoteVideo.muted = true;
     }
 });
 
 //Add remote stream to DOM object at sender's side
 peerConnection.addEventListener('track', async (event) => {
-    console.log("Stream received"); 
+    console.log("Stream received");
     remoteStream.addTrack(event.track, remoteStream);
     console.log('track event muted = ' + event.track.muted);
     event.track.onunmute = () => {
       console.log('track unmuted');
-      remoteVideo.srcObject = event.streams[0];
+      //remoteVideo.srcObject = event.streams[0];
     }
 });
 
