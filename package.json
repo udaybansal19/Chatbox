@@ -4,7 +4,7 @@
   "description": "Chat with your friends on the local network",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test/bootstrap.js --recursive test",
+    "test": "mocha test/main.js --recursive test",
     "start": "nodemon server2.js",
     "build": "npx webpack --watch"
   },

@@ -1,45 +1,70 @@
-var assert = require('assert');
-const { expect } = require('chai');
+const _ = require('lodash');
 
 describe('sample test', function () {
   it('should work', async function () {
-    console.log(await browser.version());
-
     expect(true).to.be.true;
   });
 });
 
-// describe('sample test', function () {
-//   let page;
+let page1;
+let page2;
 
-//   before (async function () {
-//     page = await browser.newPage();
-//     await page.goto('http://localhost:8080');
-//   });
+describe('Connection Test', function () {
 
-//   after (async function () {
-//     await page.close();
-//   })
+  var p1 = {
+    id: null,
+    connectedTo: null
+  };
+  var p2 = {
+    id: null,
+    connectedTo: null
+  };
 
-//   it('should have the correct page title', async function () {
-//     expect(await page.title()).to.eql('Puppeteer Mocha');
-//   });
+  before (function (done) {
+    startPage(p1,p2,done);
+    if(p1.id != null && p2.id != null)
+      done();
+  });
 
-//   it('should have a heading', async function () {
-//     const HEADING_SELECTOR = 'h1';
-//     let heading;
+  after (async function () {
+    // await page1.close();
+    // await page2.close();
+  });
 
-//     await page.waitFor(HEADING_SELECTOR);
-//     heading = await page.$eval(HEADING_SELECTOR, heading => heading.innerText);
+  it('Two way connection is working', async function () {
+    expect(p1.id).to.eql(p2.connectedTo);
+  });
 
-//     expect(heading).to.eql('Page Title');
-//   });
+});
 
-//   it('should have a single content section', async function () {
-//     const BODY_SELECTOR = '.main-content';
+async function startPage(p1, p2, done) {
+  page1 = await browser.newPage();
+  page2 = await browser.newPage();
 
-//     await page.waitFor(BODY_SELECTOR);
+  page1.on('console', message => {
+    var msg = message.text();
+    msg = _.trimStart(msg, '%c ');
+    msg = _.trimEnd(msg, ' color:Chartreuse');
+    if(_.startsWith(msg, 'My id')){
+      p1.id = _.trimStart(msg, 'My id is ');
+    }
+    if(_.startsWith(msg, 'WebRTC Connected')){
+      p1.connectedTo = _.trimStart(msg, 'WebRTC Connected with ');
+    }
+  });
+  page2.on('console', message => {
+    var msg = message.text();
+    msg = _.trimStart(msg, '%c ');
+    msg = _.trimEnd(msg, ' color:Chartreuse');
+    if(_.startsWith(msg, 'My id')){
+      p2.id = _.trimStart(msg, 'My id is ');
+    }
+    if(_.startsWith(msg, 'WebRTC Connected')){
+      p2.connectedTo = _.trimStart(msg, 'WebRTC Connected with ');
+      done();
+    }
+  });
 
-//     expect(await page.$$(BODY_SELECTOR)).to.have.lengthOf(1);
-//   });
-// });
+  await page1.goto('http://localhost:8080/conf/');
+  await page2.goto('http://localhost:8080/conf/');
+}
