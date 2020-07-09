@@ -13,7 +13,7 @@ const opts = {
 // expose variables
 before (async function () {
   global.expect = expect;
-  global.browser = await puppeteer.launch();
+  global.browser = await puppeteer.launch(opts);
 });
 
 // close browser and reset global variables

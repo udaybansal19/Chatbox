@@ -4,9 +4,10 @@
   "description": "Chat with your friends on the local network",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test/main.js --recursive test",
-    "start": "nodemon server2.js",
-    "build": "npx webpack --watch"
+    "test": "mocha --timeout 20000 test/main.js --recursive test",
+    "server": "nodemon server2.js",
+    "build": "npx webpack --watch",
+    "start": "concurrently --kill-others \"npm run server\" \"npm run build\""
   },
   "author": "",
   "license": "ISC",
@@ -22,6 +23,7 @@
     "ws": "^7.3.0"
   },
   "devDependencies": {
+    "concurrently": "^5.2.0",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11"
   },
