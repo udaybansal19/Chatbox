@@ -74,32 +74,14 @@ var pages = new Array();
 
 describe('Routing Table Test', function () {
 
-  before ( async () => {
-    var numberOfNodes = 2;
-    for(var i=0;i<numberOfNodes;i++){
-      var page;
-      pageObj = {
-        id: null,
-        connectedTo: null,
-        page: page
-      };
-      page = await browser.newPage();
-      page.on('console', message => {
-        var msg = message.text();
-        msg = _.trimStart(msg, '%c ');
-        msg = _.trimEnd(msg, ' color:Chartreuse');
-        if(_.startsWith(msg, 'My id')){
-          pageObj.id = _.trimStart(msg, 'My id is ');
-        }
-        if(_.startsWith(msg, 'WebRTC Connected')){
-          pageObj.connectedTo = _.trimStart(msg, 'WebRTC Connected with ');
-        }
-        console.log(msg);
+  before ( done => {
+    startPage();
+    startPage()
+      .then( () => {
+        setTimeout(() => {
+          done();
+        }, 10000);
       });
-      await page.goto(url);
-      page.waitFor(10000);
-      pages.push(pageObj);
-    }
   });
 
   after (async function () {
@@ -115,3 +97,27 @@ describe('Routing Table Test', function () {
   });
 
 });
+
+async function startPage() {
+      var page;
+      page = await browser.newPage();
+      pageObj = {
+        id: null,
+        connectedTo: null,
+        page: page
+      };
+      pages.push(pageObj);
+      var i = pages.length - 1;
+      pages[i].page.on('console', message => {
+        var msg = message.text();
+        msg = _.trimStart(msg, '%c ');
+        msg = _.trimEnd(msg, ' color:Chartreuse');
+        if(_.startsWith(msg, 'My id')){
+          pages[i].page.id = _.trimStart(msg, 'My id is ');
+        }
+        if(_.startsWith(msg, 'WebRTC Connected')){
+          pages[i].page.connectedTo = _.trimStart(msg, 'WebRTC Connected with ');
+        }
+      });
+      await pages[i].page.goto(url);
+}
