@@ -7,86 +7,22 @@ describe('Test', function () {
   });
 });
 
-let page1;
-let page2;
-
-describe('Connection Test', function () {
-
-  var p1 = {
-    id: null,
-    connectedTo: null
-  };
-  var p2 = {
-    id: null,
-    connectedTo: null
-  };
-
-  before (async function () {
-    //startPage(p1,p2,done);
-    page1 = await browser.newPage();
-  page2 = await browser.newPage();
-
-  page1.on('console', message => {
-    var msg = message.text();
-    msg = _.trimStart(msg, '%c ');
-    msg = _.trimEnd(msg, ' color:Chartreuse');
-    if(_.startsWith(msg, 'My id')){
-      p1.id = _.trimStart(msg, 'My id is ');
-    }
-    if(_.startsWith(msg, 'WebRTC Connected')){
-      p1.connectedTo = _.trimStart(msg, 'WebRTC Connected with ');
-    }
-  });
-  page2.on('console', message => {
-    var msg = message.text();
-    msg = _.trimStart(msg, '%c ');
-    msg = _.trimEnd(msg, ' color:Chartreuse');
-    if(_.startsWith(msg, 'My id')){
-      p2.id = _.trimStart(msg, 'My id is ');
-    }
-    if(_.startsWith(msg, 'WebRTC Connected')){
-      p2.connectedTo = _.trimStart(msg, 'WebRTC Connected with ');
-    }
-  });
-
-  await page1.goto(url);
-  await page2.goto(url);
-
-  await page1.waitFor(4000);
-  await page2.waitFor(4000);
-  });
-
-  after (async function () {
-    await page1.close();
-    await page2.close();
-  });
-
-  it('Two way connection is working', async function () {
-    expect(p1.id).to.eql(p2.connectedTo);
-  });
-  it('Two way connection is working', async function () {
-    expect(p2.id).to.eql(p1.connectedTo);
-  });
-
-});
-
 var pages = new Array();
 
-describe('Routing Table Test', function () {
+describe('Connection Test', function () {
 
   before ( done => {
     startPage();
     startPage()
       .then( () => {
-        setTimeout(() => {
-          done();
-        }, 10000);
+        done();
       });
   });
 
   after (async function () {
-    // await page1.close();
-    // await page2.close();
+    await pages[0].page.close();
+    await pages[1].page.close();
+    pages = new Array();
   });
 
   it('Two way connection is working', async function () {
