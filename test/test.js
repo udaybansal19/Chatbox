@@ -28,10 +28,10 @@ async function startPage() {
     msg = _.trimStart(msg, '%c ');
     msg = _.trimEnd(msg, ' color:Chartreuse');
     if(_.startsWith(msg, 'My id')){
-      pages[i].page.id = _.trimStart(msg, 'My id is ');
+      pages[i].id = _.trimStart(msg, 'My id is ');
     }
     if(_.startsWith(msg, 'WebRTC Connected')){
-      pages[i].page.connectedTo = _.trimStart(msg, 'WebRTC Connected with ');
+      pages[i].connectedTo = _.trimStart(msg, 'WebRTC Connected with ');
     }
   });
   
@@ -46,7 +46,9 @@ describe('Connection Test', function () {
     startPage();
     startPage()
       .then( () => {
-        done();
+        setTimeout(() => {
+          done();
+        }, 500);
       });
   });
 
@@ -66,14 +68,16 @@ describe('Connection Test', function () {
 });
 
 describe('Routing Table Tests', function () {
-  var numberOfPeers = 16;
+  var numberOfPeers = 2;
   before ( done => {
     for(var i=0;i<numberOfPeers - 1;i++) {
       startPage();
     }
     startPage()
       .then( () => {
-        done();
+        setTimeout(() => {
+          done();
+        }, 500);
       });
   });
   it('Routing Table', async function () {
