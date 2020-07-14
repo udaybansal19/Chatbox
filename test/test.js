@@ -15,7 +15,7 @@ async function startPage() {
 
   pageObj = {
     id: null,
-    connectedTo: null,
+    connectedTo: new Array(),
     page: page
   };
 
@@ -31,7 +31,7 @@ async function startPage() {
       pages[i].id = _.trimStart(msg, 'My id is ');
     }
     if(_.startsWith(msg, 'WebRTC Connected')){
-      pages[i].connectedTo = _.trimStart(msg, 'WebRTC Connected with ');
+      pages[i].connectedTo.push(_.trimStart(msg, 'WebRTC Connected with '));
     }
   });
   
@@ -61,14 +61,14 @@ describe('Connection Test', function () {
   it('Two way connection is working', async function () {
     expect(pages[0].id).to.not.eql(null);
     expect(pages[1].id).to.not.eql(null);
-    expect(pages[0].id).to.eql(pages[1].connectedTo);
-    expect(pages[1].id).to.eql(pages[0].connectedTo);
+    expect(pages[0].id).to.eql(pages[1].connectedTo[0]);
+    expect(pages[1].id).to.eql(pages[0].connectedTo[0]);
   });
 
 });
 
 describe('Routing Table Tests', function () {
-  var numberOfPeers = 2;
+  var numberOfPeers = 4;
   before ( done => {
     for(var i=0;i<numberOfPeers - 1;i++) {
       startPage();
