@@ -1,3 +1,28 @@
+body {
+    text-align:  center;
+    background: antiquewhite;
+}
+
+button {
+    border-radius: 10PX;
+    background: cornflowerblue;
+    padding: 7px;
+    font-style: italic;
+    color: whitesmoke;
+    font-size: medium;
+    box-shadow: 3px 4px black;
+    text-shadow: -1px 0px black;
+}
+
+textarea#connectTo {
+    border-radius: 10px;
+    background-color: #6cbeff;
+    color: #000000;
+    font-style: italic;
+    font-size: larger;
+    box-shadow: 5px 3px black;
+}
+
 .chat {
     margin: auto;
     width: 510px;
@@ -7,6 +32,11 @@
 
 .video-chat {
     align-content: center;
+}
+video{
+    transform: rotateY(180deg);
+    -webkit-transform:rotateY(180deg); /* Safari and Chrome */
+    -moz-transform:rotateY(180deg); /* Firefox */
 }
 
 .icon {
