@@ -12,6 +12,8 @@ button {
     font-size: medium;
     box-shadow: 3px 4px black;
     text-shadow: -1px 0px black;
+    vertical-align: bottom;
+    margin: 5px;
 }
 
 textarea#connectTo {
